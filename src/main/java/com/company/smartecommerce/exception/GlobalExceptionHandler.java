@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,9 +19,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ApiResponse<Object> response = ApiResponse.<Object>builder()
-                .success(false)
+                .status("RESOURCE_NOT_FOUND")
                 .message(ex.getMessage())
-                .data(null)
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -30,9 +29,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadRequestException(BadRequestException ex) {
         ApiResponse<Object> response = ApiResponse.<Object>builder()
-                .success(false)
+                .status("BAD_REQUEST")
                 .message(ex.getMessage())
-                .data(null)
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -41,27 +39,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Object>> handleAccessDeniedException(AccessDeniedException ex) {
         ApiResponse<Object> response = ApiResponse.<Object>builder()
-                .success(false)
+                .status("AUTHORIZATION_ERROR")
                 .message("Access denied: " + ex.getMessage())
-                .data(null)
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<ApiResponse.ValidationError> errors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            Object rejectedValue = ((FieldError) error).getRejectedValue();
+            
+            ApiResponse.ValidationError validationError = ApiResponse.ValidationError.builder()
+                    .field(fieldName)
+                    .message(errorMessage)
+                    .rejectedValue(rejectedValue)
+                    .build();
+            errors.add(validationError);
         });
 
-        ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
-                .success(false)
+        ApiResponse<Object> response = ApiResponse.<Object>builder()
+                .status("VALIDATION_ERROR")
                 .message("Validation failed")
-                .data(errors)
+                .errors(errors)
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -70,9 +74,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
         ApiResponse<Object> response = ApiResponse.<Object>builder()
-                .success(false)
+                .status("INTERNAL_SERVER_ERROR")
                 .message("An unexpected error occurred: " + ex.getMessage())
-                .data(null)
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

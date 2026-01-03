@@ -1,6 +1,6 @@
 package com.company.smartecommerce.common.utils;
 
-import com.company.smartecommerce.common.constants.AppConstants;
+import com.company.smartecommerce.common.constants.SecurityConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(AppConstants.JWT_SECRET.getBytes());
+        return Keys.hmacShaKeyFor(SecurityConstants.JWT_SECRET.getBytes());
     }
 
     public String extractUsername(String token) {
@@ -56,7 +56,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + AppConstants.JWT_EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.JWT_EXPIRATION_MS))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -67,7 +67,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + AppConstants.JWT_REFRESH_EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.JWT_REFRESH_EXPIRATION_MS))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -3,50 +3,23 @@
 *.class
 *.o
 *.obj
-*.exe
-*.dll
-*.so
-*.a
 *.out
-target/
-build/
-dist/
 
 # Dependencies
-lib/
-lib64/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.env
-.env.local
-.env.*
-
-# Java specific
-*.jar
-*.war
-*.ear
-*.class
-*.log
-!application.log
-
-# Maven
-.mvn/
 target/
+.gradle/
 
-# IDE
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
 
-# System
-.DS_Store
-Thumbs.db
+# Environment
+.env
+.env.local
+*.env.*
 ```
