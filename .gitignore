@@ -4,48 +4,39 @@
 *.o
 *.obj
 *.out
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-*.so
 *.dll
-*.exe
-*.jar
-*.war
-*.ear
-*.zip
-*.tar
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.gz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
+*.so
+*.a
 
 # Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-.env.*
 target/
 .gradle/
 .mypy_cache/
 .pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage
 coverage/
 htmlcov/
 .coverage
@@ -53,19 +44,4 @@ htmlcov/
 # Build directories
 build/
 dist/
-out/
-bin/
-obj/
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-*.log
-
-# System files
-.DS_Store
-Thumbs.db
 ```

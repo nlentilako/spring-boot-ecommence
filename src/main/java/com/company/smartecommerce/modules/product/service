@@ -1,0 +1,95 @@
+package com.company.smartecommerce.modules.product.service;
+
+import com.company.smartecommerce.modules.product.domain.entity.Product;
+import com.company.smartecommerce.modules.product.domain.repository.ProductRepository;
+import com.company.smartecommerce.modules.product.dto.ProductRequest;
+import com.company.smartecommerce.modules.product.dto.ProductResponse;
+import com.company.smartecommerce.modules.product.mapper.ProductMapper;
+import com.company.smartecommerce.modules.category.domain.entity.Category;
+import com.company.smartecommerce.modules.category.domain.repository.CategoryRepository;
+import com.company.smartecommerce.common.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductMapper productMapper;
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getAllProducts(Pageable pageable) {
+        Page<Product> products = productRepository.findAll(pageable);
+        return products.map(productMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getProductById(Long id) {
+        Product product = findProductById(id);
+        return productMapper.toResponse(product);
+    }
+
+    @Transactional
+    public ProductResponse createProduct(ProductRequest request) {
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+
+        Product product = productMapper.toEntity(request);
+        product.setCategory(category);
+        
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toResponse(savedProduct);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
+        Product product = findProductById(id);
+        
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+
+        productMapper.updateEntityFromRequest(request, product);
+        product.setCategory(category);
+        
+        Product updatedProduct = productRepository.save(product);
+        return productMapper.toResponse(updatedProduct);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = findProductById(id);
+        productRepository.delete(product);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable) {
+        Page<Product> products = productRepository.findByCategoryId(categoryId, pageable);
+        return products.map(productMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> searchProducts(String keyword, Pageable pageable) {
+        Page<Product> products = productRepository.findByKeyword(keyword, pageable);
+        return products.map(productMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getTopProducts() {
+        List<Product> products = productRepository.findTop10ByOrderByCreatedAtDesc();
+        return products.stream()
+                .map(productMapper::toResponse)
+                .toList();
+    }
+
+    private Product findProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+}
