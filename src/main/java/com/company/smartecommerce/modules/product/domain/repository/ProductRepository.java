@@ -14,10 +14,12 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
     
+    List<Product> findByCategoryId(Long categoryId);
+    
     @Query("SELECT p FROM Product p WHERE " +
            "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Product> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(@Param("keyword") String keyword, Pageable pageable);
     
     List<Product> findTop10ByOrderByCreatedAtDesc();
 }
